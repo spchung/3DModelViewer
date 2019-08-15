@@ -1,0 +1,66 @@
+<html>
+	<head>
+		<title>Aemass 3D viewer </title>
+		<style>
+			body {
+				overflow: hidden;
+				margin: 0;
+			}
+			.ui {
+				position: absolute;
+			}
+			button{
+				margin: 20px;
+			}
+			.loadButton {
+				bottom:0; 
+				right:0; 
+				width:50px; 
+				border: 2px solid #73AD21;
+			}
+
+			.resetButton {
+				bottom:30; 
+				right:0; 
+				width:100px; 
+				border: 2px solid #73AD21;
+			}
+			.resetButton:hover {
+				background-color:  #73AD21;
+			}
+
+			.loadButton:hover {
+				background-color:  #73AD21;
+			}
+
+			.customText {
+				color: grey;
+				right: 55;
+				bottom: 0;
+				margin: 20px;
+			}
+
+			.hi {  
+				background-color: white;
+			}
+
+		</style>
+	</head>
+	<body>
+		<script src="https://threejs.org/build/three.min.js"></script>
+		<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+		<script src="https://threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/GLTFLoader.js"></script>
+		
+		<div style="width:100%;height:50px;text-align: center; color:white;" class="ui">Aemass Viewer</div>
+		<button id="load-button" class="ui loadButton">Upload</button>
+		<button id="reset-button" class="ui resetButton">Reset Viewer</button>
+
+		<input type="file" id="real-file" class="ui" hidden='hedden'/> 
+		<span id="load-text" class="ui customText"> No File Chosen Yet. </span>
+
+
+		<!-- load WebGL last  -->
+		<script src="scripts.js"></script>
+
+	</body>
+</html>
