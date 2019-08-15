@@ -64,7 +64,7 @@ var main = function () {
 const logoPath = '/assets/dark-transparent.png';
 // to be replaced by an Aemass 3D logo 
 var instantiateLogo = function(){
-  var geometry = new THREE.BoxGeometry(1, 1, 1);
+  var geometry = new THREE.BoxGeometry(2, 2, 2);
   var material = new THREE.MeshBasicMaterial({
     color: 0x00ff00,
     wireframe: true
@@ -77,7 +77,9 @@ var instantiateLogo = function(){
 
 // for reseting the scene 
 var resetScene = function() {
-  scene.remove(models.pop());
+  for (let i=0; i < models.length; i++){
+    scene.remove(models.pop());
+  }
   instantiateLogo();
 };
 
@@ -105,16 +107,23 @@ window.addEventListener("load", function() {
 // Works for both animated and non-animated GLBs
 var loadGLTFFromFile = function( arrayBuff ) {
   const glbLoader = new THREE.GLTFLoader();
+  var boxHeight;
 
+  var scale = new THREE.Vector3( 1,1,1 );
+  var position = new THREE.Vector3( 0,0,0 );
+  
   const animationCheck = function( obj ) {
+    // coverage box of the loaded model > used to compute model center point 
+    var objBox = new THREE.Box3().setFromObject ( obj.scene.children[0] );
+    position.y = -(objBox.min.y + objBox.max.y)/2; 
     if ( obj.animations.length > 0 ) {
       console.log( " found animations ");
       loadAnimatedModel( obj, scale, position );
     }
     else {
-      console.log(" hi no ");
+      console.log(" no animation  ");
+      
       loadStaticModel(obj, scale, position );
-
     }
   }
 
@@ -151,9 +160,14 @@ var loadGLTFFromFile = function( arrayBuff ) {
 
   const onError = ( errorMessage ) => { console.log( errorMessage )};
 
-  const scale = new THREE.Vector3( 1,1,1 );
-  const position = new THREE.Vector3( 0,0,0 );
+  
   glbLoader.parse(arrayBuff, '',  obj => animationCheck( obj ),  onError);
+  
+}
+
+var getScale = function(an_object) {
+  var objBox = new THREE.Box3().setFromObject( an_object );
+  console.log( objBox.min, objBox.max )
 }
 
 var animate = function() {
