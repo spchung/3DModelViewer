@@ -4,12 +4,15 @@ var scene;
 var camera, logoCamera;
 var renderer;
 var models = [];
+var controls; //orbitControl
 
 //logo
 var logo;
 
 var linkToFile;
-var controls;
+
+// dat GUI helper you see on the top right of your window
+var gui = new dat.GUI();
 
 //Animation 
 const mixers = [];
@@ -22,9 +25,9 @@ const customText = document.getElementById( 'load-text' );
 const resetBtn = document.getElementById( 'reset-button' ); 
 
 resetBtn.addEventListener( "click", function() {
-  console.log( 'reseting scene', models.length);
   // scene.remove( models[0] );
   resetScene();
+  
 });
 
 customBtn.addEventListener( "click", function() {
@@ -51,9 +54,17 @@ var main = function () {
   document.body.appendChild( renderer.domElement );
 
   controls = new THREE.OrbitControls( camera, renderer.domElement );
+  scene.background  = new THREE.Color( '#8f97a8' );
 
-  var ambLight = new THREE.AmbientLight( 0x404040, 10 ); // soft white light
-  scene.add( ambLight );
+  var ambLight = new THREE.AmbientLight( 0x404040, 1 ); // soft white light
+  var topLight = new THREE.DirectionalLight( 0xffffff, 2.5 );
+  var bottomLight = new THREE.DirectionalLight( 0xffffff, 2.5 );
+  var sideLight = new THREE.DirectionalLight( 0xffffff, 2.5 );
+  var backLight = new THREE.DirectionalLight( 0xffffff, 2.5 );
+  bottomLight.position.set( 0,-5,0 );
+  sideLight.position.set( 0,0,5 );
+  backLight.position.set( 0,0,-5) ;
+  scene.add( ambLight, sideLight, bottomLight, topLight );
   
   instantiateLogo();
 
@@ -77,10 +88,18 @@ var instantiateLogo = function(){
 
 // for reseting the scene 
 var resetScene = function() {
-  for (let i=0; i < models.length; i++){
-    scene.remove(models.pop());
+  if (models.length > 0){
+    for (let i=0; i < models.length; i++){
+      scene.remove(models.pop());
+      console.log( "current number of models: ", models.length );
+    }
+  }
+  else {
+    console.log( "no more models" );
+    
   }
   instantiateLogo();
+  
 };
 
 // for animations 
@@ -99,7 +118,6 @@ window.addEventListener("load", function() {
     reader.readAsArrayBuffer(event.srcElement.files[0]);
     // var me = this;
     reader.onload = function () {
-      console.log(reader.result);
       loadGLTFFromFile(reader.result);
     }
 }});
@@ -107,7 +125,7 @@ window.addEventListener("load", function() {
 // Works for both animated and non-animated GLBs
 var loadGLTFFromFile = function( arrayBuff ) {
   const glbLoader = new THREE.GLTFLoader();
-  var boxHeight;
+  // var boxHeight;
 
   var scale = new THREE.Vector3( 1,1,1 );
   var position = new THREE.Vector3( 0,0,0 );
@@ -116,6 +134,7 @@ var loadGLTFFromFile = function( arrayBuff ) {
     // coverage box of the loaded model > used to compute model center point 
     var objBox = new THREE.Box3().setFromObject ( obj.scene.children[0] );
     position.y = -(objBox.min.y + objBox.max.y)/2; 
+
     if ( obj.animations.length > 0 ) {
       console.log( " found animations ");
       loadAnimatedModel( obj, scale, position );
@@ -146,6 +165,7 @@ var loadGLTFFromFile = function( arrayBuff ) {
 
     scene.remove( logo );
     scene.add( model );
+    addToDatGui( model );
   };
 
   const loadStaticModel = function( obj, scale, position ) {
@@ -170,6 +190,38 @@ var getScale = function(an_object) {
   console.log( objBox.min, objBox.max )
 }
 
+//DAT GUI 
+///////////
+//gui element placeholders 
+var controller = new function() {
+  this.scale = 1;
+  this.positionX = 0;
+  this.positionY = 0;
+  this.positionZ = 0;
+  this.rotationX = 0;
+  this.rotationY = 90;
+  this.rotationZ = 0;
+  // this.boxColor = color;
+  this.castShadow = true;
+  this.boxOpacity = 1;
+}();
+
+// Add elements to gui 
+var addToDatGui = function( sceneObject ) {
+  console.log( Object.keys( sceneObject ) );
+
+  gui.add( controller, 'scale', 0.1, 5).onChange( function(){
+    sceneObject.scale.x = controller.scale;
+    sceneObject.scale.y = controller.scale;
+    sceneObject.scale.z = controller.scale;
+  });
+  // var f1 = gui.addFolder('Scale');
+  gui.add 
+
+};
+
+//animation
+///////////
 var animate = function() {
   requestAnimationFrame(animate);
   update();
