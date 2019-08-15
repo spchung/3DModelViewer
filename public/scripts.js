@@ -62,21 +62,8 @@ var main = function () {
 
 // AEMASS LOGO
 const logoPath = '/assets/dark-transparent.png';
-//
+// to be replaced by an Aemass 3D logo 
 var instantiateLogo = function(){
-  // const textureLoader = new THREE.TextureLoader();
-  // const material = new THREE.MeshLambertMaterial({
-  //   map: textureLoader.load( logoPath )
-  // });
-
-  // var geometry = new THREE.PlaneGeometry(67.5,17.1);
-  // var mesh = new THREE.Mesh ( geometry, material );
-  // mesh.position.set( 0,0,0 );
-
-  // logoScene.add( logoCamera, mesh );
-
-  // fileLoader.load( logoPath, (logo) => onLoad(logo)); 
-
   var geometry = new THREE.BoxGeometry(1, 1, 1);
   var material = new THREE.MeshBasicMaterial({
     color: 0x00ff00,
@@ -103,14 +90,6 @@ var update = function () {
   }
 }
 
-var animate = function() {
-  requestAnimationFrame(animate);
-  update();
-  controls.update();
-  renderer.render(scene, camera);
-  
-};
-
 // listens to load actions on the whole window 
 window.addEventListener("load", function() {
   document.getElementById("real-file").onchange = function(event) {
@@ -118,19 +97,31 @@ window.addEventListener("load", function() {
     reader.readAsArrayBuffer(event.srcElement.files[0]);
     // var me = this;
     reader.onload = function () {
-      // linkToFile = reader.result;
+      console.log(reader.result);
       loadGLTFFromFile(reader.result);
     }
 }});
 
-//Only works for animated files 
-var loadGLTFFromFile = function(arrayBuff) {
+// Works for both animated and non-animated GLBs
+var loadGLTFFromFile = function( arrayBuff ) {
   const glbLoader = new THREE.GLTFLoader();
 
+  const animationCheck = function( obj ) {
+    if ( obj.animations.length > 0 ) {
+      console.log( " found animations ");
+      loadAnimatedModel( obj, scale, position );
+    }
+    else {
+      console.log(" hi no ");
+      loadStaticModel(obj, scale, position );
+
+    }
+  }
+
   //reusable upload function 
-  const onLoad = function( obj, scale, position ) {
+  const loadAnimatedModel = function( obj, scale, position ) {
     //adjust position and scale of loaded model 
-    const model = obj.scene.children[ 0 ];
+    var model = obj.scene.children[ 0 ];
     model.position.copy( position );
     model.scale.copy( scale );
 
@@ -148,13 +139,30 @@ var loadGLTFFromFile = function(arrayBuff) {
     scene.add( model );
   };
 
-  const onError = ( errorMessage ) => { console.log( errorMessage )};
+  const loadStaticModel = function( obj, scale, position ) {
+    var model = obj.scene.children[ 0 ]; 
+    model.position.copy( position );
+    model.scale.copy( scale );
 
+    models.push ( model );
+    scene.remove( logo );
+    scene.add( model );
+  }
+
+  const onError = ( errorMessage ) => { console.log( errorMessage )};
 
   const scale = new THREE.Vector3( 1,1,1 );
   const position = new THREE.Vector3( 0,0,0 );
-  glbLoader.parse(arrayBuff, '',  obj => onLoad( obj, scale, position ),  onError);
+  glbLoader.parse(arrayBuff, '',  obj => animationCheck( obj ),  onError);
 }
+
+var animate = function() {
+  requestAnimationFrame(animate);
+  update();
+  controls.update();
+  renderer.render(scene, camera);
+  
+};
 
 
 main();
