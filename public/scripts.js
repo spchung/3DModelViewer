@@ -8,7 +8,6 @@ var controls; //orbitControl
 
 //logo
 var logo;
-
 var linkToFile;
 
 // dat GUI helper you see on the top right of your window
@@ -25,9 +24,9 @@ const customText = document.getElementById( 'load-text' );
 const resetBtn = document.getElementById( 'reset-button' ); 
 
 resetBtn.addEventListener( "click", function() {
-  // scene.remove( models[0] );
-  resetScene();
-  
+  // if ( models.length > 1 ) {
+   resetScene();
+  // }
 });
 
 customBtn.addEventListener( "click", function() {
@@ -56,7 +55,7 @@ var main = function () {
   controls = new THREE.OrbitControls( camera, renderer.domElement );
   scene.background  = new THREE.Color( '#8f97a8' );
 
-  var ambLight = new THREE.AmbientLight( 0x404040, 1 ); // soft white light
+  var ambLight = new THREE.AmbientLight( 0x404040, 6); // soft white light
   var topLight = new THREE.DirectionalLight( 0xffffff, 2.5 );
   var bottomLight = new THREE.DirectionalLight( 0xffffff, 2.5 );
   var sideLight = new THREE.DirectionalLight( 0xffffff, 2.5 );
@@ -64,7 +63,7 @@ var main = function () {
   bottomLight.position.set( 0,-5,0 );
   sideLight.position.set( 0,0,5 );
   backLight.position.set( 0,0,-5) ;
-  scene.add( ambLight, sideLight, bottomLight, topLight );
+  scene.add( ambLight, bottomLight, topLight );
   
   instantiateLogo();
 
@@ -88,16 +87,20 @@ var instantiateLogo = function(){
 
 // for reseting the scene 
 var resetScene = function() {
+  console.log("length upon entry", models.length);
+  var num = models.length;
+
   if (models.length > 0){
-    for (let i=0; i < models.length; i++){
-      scene.remove(models.pop());
+    for (let i = 0; i < num; i++){
+      console.log(i)
+      scene.remove( models.pop() );
       console.log( "current number of models: ", models.length );
     }
   }
   else {
     console.log( "no more models" );
-    
   }
+
   instantiateLogo();
   
 };
@@ -141,7 +144,6 @@ var loadGLTFFromFile = function( arrayBuff ) {
     }
     else {
       console.log(" no animation  ");
-      
       loadStaticModel(obj, scale, position );
     }
   }
